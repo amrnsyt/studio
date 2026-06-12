@@ -1,12 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export', // <=== Tells Next.js to compile files into flat HTML/CSS
+  output: 'export', // <=== CRITICAL: Tells Next.js to generate the missing "./out" folder
   images: {
-    unoptimized: true, // <=== Required because GitHub has no image-optimization server
+    unoptimized: true, // <=== CRITICAL: Stops images from causing a build crash on GitHub
   },
-  // If your GitHub repository link is ://github.com, 
-  // uncomment the line below and change '/my-task-app' to match your exact repository name!
-  // basePath: '/my-task-app', 
 };
 
 module.exports = nextConfig;
