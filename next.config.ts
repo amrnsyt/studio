@@ -1,35 +1,12 @@
-import type {NextConfig} from 'next';
-
-const nextConfig: NextConfig = {
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export', // <=== Tells Next.js to compile files into flat HTML/CSS
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+    unoptimized: true, // <=== Required because GitHub has no image-optimization server
   },
+  // If your GitHub repository link is ://github.com, 
+  // uncomment the line below and change '/my-task-app' to match your exact repository name!
+  // basePath: '/my-task-app', 
 };
 
-export default nextConfig;
+module.exports = nextConfig;
