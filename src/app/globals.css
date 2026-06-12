@@ -22,25 +22,40 @@
 
 @layer components {
   .glass {
-    @apply bg-white/70 backdrop-blur-lg border border-white/30 shadow-xl;
+    @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(255,122,144,0.1)];
   }
   
   .btn-tactile {
-    @apply transition-transform active:scale-[0.94] duration-150;
+    @apply transition-all active:scale-[0.94] hover:shadow-lg duration-200;
   }
 
   .pulse-kick {
-    @apply animate-pulse-soft shadow-[0_0_20px_rgba(255,122,144,0.4)];
+    @apply animate-pulse-soft shadow-[0_0_40px_rgba(255,122,144,0.3)];
   }
 }
 
 body {
-  background: linear-gradient(135deg, #FFF5F7 0%, #F3EAF8 100%);
+  background: radial-gradient(circle at top left, #FFF5F7 0%, #F3EAF8 40%, #FFF5F7 100%);
   min-height: 100vh;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
 ::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/20 rounded-full;
+}
+
+.custom-chart-gradient stop:first-child {
+  stop-color: #FF7A90;
+}
+.custom-chart-gradient stop:last-child {
+  stop-color: #FF7A90;
 }
