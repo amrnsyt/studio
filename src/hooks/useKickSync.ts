@@ -83,9 +83,6 @@ export function useKickSync() {
 
     const unsub = onSnapshot(q, (snapshot) => {
       const newEntries = snapshot.docs.map(d => ({ id: d.id, ...d.data() } as KickEntry));
-      
-      // HUD logic for new kicks or reactions (Simplified version for client-side)
-      // In a real app, this would also be triggered by cloud functions / FCM
       setEntries(newEntries);
     });
 
@@ -99,31 +96,45 @@ export function useKickSync() {
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) return;
-    await updateDoc(doc(db, "users", user.id), updates);
+    try {
+      await updateDoc(doc(db, "users", user.id), updates);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
   const generatePairingCode = async () => {
     if (!user) return;
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    await setDoc(doc(db, "pairingCodes", code), {
-      creatorId: user.id,
-      expiresAt: Date.now() + 600000 // 10 mins
-    });
-    setPairingCode(code);
+    try {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      await setDoc(doc(db, "pairingCodes", code), {
+        creatorId: user.id,
+        expiresAt: Date.now() + 600000 // 10 mins
+      });
+      setPairingCode(code);
+    } catch (error) {
+      console.error("Error generating pairing code:", error);
+    }
   };
 
-  const pairWithCode = async (code: string) => {
-    if (!user) return;
-    const snap = await getDoc(doc(db, "pairingCodes", code));
-    if (snap.exists()) {
-      const data = snap.data();
-      const pairId = [user.id, data.creatorId].sort().join("_");
-      
-      await updateDoc(doc(db, "users", user.id), { pairId });
-      await updateDoc(doc(db, "users", data.creatorId), { pairId });
-      await deleteDoc(doc(db, "pairingCodes", code));
-      showHud("Successfully paired devices!", "success");
-      return true;
+  const pairWithCode = async (code: string): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      const snap = await getDoc(doc(db, "pairingCodes", code));
+      if (snap.exists()) {
+        const data = snap.data();
+        const pairId = [user.id, data.creatorId].sort().join("_");
+        
+        await updateDoc(doc(db, "users", user.id), { pairId });
+        await updateDoc(doc(db, "users", data.creatorId), { pairId });
+        await deleteDoc(doc(db, "pairingCodes", code));
+        showHud("Successfully paired devices!", "success");
+        return true;
+      }
+    } catch (error) {
+      console.error("Pairing error:", error);
+      showHud("Pairing failed. Please check the code.", "info");
+      return false;
     }
     return false;
   };
@@ -133,35 +144,47 @@ export function useKickSync() {
       showHud("Please pair devices first", "info");
       return;
     }
-    const kick = {
-      pairId: user.pairId,
-      time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      intensity,
-      notes,
-      role: user.role,
-      userName: user.name || "Partner",
-      loved: false,
-      timestamp: serverTimestamp()
-    };
-    await addDoc(collection(db, "kicks"), kick);
-    showHud("Kick pushed to matrix ledger.", "success");
+    try {
+      const kick = {
+        pairId: user.pairId,
+        time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        intensity,
+        notes,
+        role: user.role,
+        userName: user.name || "Partner",
+        loved: false,
+        timestamp: serverTimestamp()
+      };
+      await addDoc(collection(db, "kicks"), kick);
+      showHud("Kick pushed to matrix ledger.", "success");
+    } catch (error) {
+      console.error("Error logging kick:", error);
+    }
   };
 
   const reactToKick = async (kickId: string) => {
     if (!user) return;
-    const kickRef = doc(db, "kicks", kickId);
-    const snap = await getDoc(kickRef);
-    if (snap.exists()) {
-      const currentLoved = snap.data().loved;
-      await updateDoc(kickRef, { loved: !currentLoved });
-      if (!currentLoved) {
-        showHud(`❤️ Husband acknowledged the kick!`, "heart");
+    try {
+      const kickRef = doc(db, "kicks", kickId);
+      const snap = await getDoc(kickRef);
+      if (snap.exists()) {
+        const currentLoved = snap.data().loved;
+        await updateDoc(kickRef, { loved: !currentLoved });
+        if (!currentLoved) {
+          showHud(`❤️ Husband acknowledged the kick!`, "heart");
+        }
       }
+    } catch (error) {
+      console.error("Error reacting to kick:", error);
     }
   };
 
   const deleteKick = async (kickId: string) => {
-    await deleteDoc(doc(db, "kicks", kickId));
+    try {
+      await deleteDoc(doc(db, "kicks", kickId));
+    } catch (error) {
+      console.error("Error deleting kick:", error);
+    }
   };
 
   return {
