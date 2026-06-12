@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Trash2, TrendingUp, Calendar as CalendarIcon, Activity } from "lucide-react";
 import { KickEntry } from "@/hooks/useKickSync";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 import { 
   AreaChart, 
   Area, 
@@ -26,13 +27,18 @@ export function AnalyticsTab({
   onReact: (id: string) => void,
   onDelete: (id: string) => void
 }) {
-  // Process data for chart - simple grouping by time for demo
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const chartData = entries.slice(0, 10).reverse().map(e => ({
     time: e.time,
     intensity: e.intensity
   }));
 
-  const todayCount = entries.length; // Simplified for scaffolding
+  const todayCount = entries.length;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
@@ -80,31 +86,37 @@ export function AnalyticsTab({
         </div>
 
         <div className="h-[250px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorIntensity" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#FF7A90" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#FF7A90" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#FF7A9020" />
-              <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} />
-              <YAxis hide domain={[0, 5]} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: 'white', borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
-                labelStyle={{ fontWeight: 'bold', color: '#FF7A90' }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="intensity" 
-                stroke="#FF7A90" 
-                strokeWidth={3} 
-                fillOpacity={1} 
-                fill="url(#colorIntensity)" 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          {mounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorIntensity" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#FF7A90" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#FF7A90" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#FF7A9020" />
+                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#666'}} />
+                <YAxis hide domain={[0, 5]} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'white', borderRadius: '1rem', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }}
+                  labelStyle={{ fontWeight: 'bold', color: '#FF7A90' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="intensity" 
+                  stroke="#FF7A90" 
+                  strokeWidth={3} 
+                  fillOpacity={1} 
+                  fill="url(#colorIntensity)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-primary/5 rounded-2xl animate-pulse">
+              <Activity className="w-8 h-8 text-primary/20" />
+            </div>
+          )}
         </div>
       </Card>
 
@@ -142,25 +154,21 @@ export function AnalyticsTab({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="ghost"
+                    <button
                       onClick={() => onReact(entry.id)}
                       className={cn(
-                        "rounded-full w-12 h-12 btn-tactile",
+                        "rounded-full w-12 h-12 btn-tactile flex items-center justify-center transition-all",
                         entry.loved ? "text-primary bg-primary/5" : "text-muted-foreground/40 hover:text-primary"
                       )}
                     >
                       <Heart className={cn("w-6 h-6 transition-all", entry.loved && "fill-primary scale-110")} />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
+                    </button>
+                    <button
                       onClick={() => onDelete(entry.id)}
-                      className="rounded-full w-10 h-10 text-muted-foreground/20 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                      className="rounded-full w-10 h-10 text-muted-foreground/20 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center"
                     >
                       <Trash2 className="w-5 h-5" />
-                    </Button>
+                    </button>
                   </div>
                 </Card>
               </motion.div>

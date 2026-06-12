@@ -1,10 +1,16 @@
-import type {Metadata} from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'KickSync - Collaborative Baby Tracker',
   description: 'Real-time collaborative baby kick tracker with shared sync.',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0',
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
