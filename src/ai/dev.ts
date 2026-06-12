@@ -1,4 +1,5 @@
-import { config } from 'dotenv';
-config();
 
-import '@/ai/flows/daily-kick-rhythm-summary.ts';
+/**
+ * AI Development Entrypoint Disabled
+ */
+export {};
